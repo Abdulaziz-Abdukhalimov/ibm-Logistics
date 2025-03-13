@@ -3,34 +3,50 @@ const ulAssigments = document.querySelector(".assigments");
 const input = document.querySelector(".file-input");
 
 document.addEventListener("DOMContentLoaded", function () {
-  loadAssignments();
+  loadAssignments(); // Load saved assignments when page loads
 });
 
 form.addEventListener("submit", function (e) {
   e.preventDefault();
 
-  function createAssignmentLink(item, name) {
-    return `
-    <li> <a href="${item}" target="_blank">${name}</a> </li>
-  `;
-  }
+  // function createAssignmentLink(url, name) {
+  //   return `
+  //     <li> <a href="${url}" target="_blank">${name}</a> </li>
+  //   `;
+  // }
+
   const assigmentName = prompt("What is the name of your assignment?");
+
   ulAssigments.insertAdjacentHTML(
     "beforeend",
     createAssignmentLink(input.value, assigmentName)
   );
+
   saveAssignment(input.value, assigmentName);
   input.value = "";
   input.focus();
 });
 
-function saveAssignment(text) {
+function saveAssignment(url, name) {
   let assignments = JSON.parse(localStorage.getItem("assignments")) || [];
-  assignments.push(text);
+  assignments.push({ url, name }); // Save as object
   localStorage.setItem("assignments", JSON.stringify(assignments));
 }
 
 function loadAssignments() {
   let assignments = JSON.parse(localStorage.getItem("assignments")) || [];
-  assignments.forEach(createAssignmentLink);
+  assignments.forEach(({ url, name }) => {
+    ulAssigments.insertAdjacentHTML(
+      "beforeend",
+      createAssignmentLink(url, name)
+    );
+  });
+}
+// Fix createAssignmentLink function (move it outside event listener)
+function createAssignmentLink(url, name) {
+  return `
+   <li>
+     <a href="${url}" target="_blank">${name}</a>
+   </li>
+  `;
 }
