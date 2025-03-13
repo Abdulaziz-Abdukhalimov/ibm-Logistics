@@ -27,7 +27,7 @@ h1 {
 }
 .assigments li {
   display: flex;
-  width: 100%;
+  width: 80%;
   padding: 20px;
   margin: 20px 0;
   background-color: #007bff;
@@ -79,11 +79,5 @@ li:hover {
 @media (max-width: 600px) {
   .container {
     width: 90%;
-  }
-  .assigments {
-    margin-right: 60px;
-  }
-  #submit-form {
-    margin-left: 35px;
   }
 }
