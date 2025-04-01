@@ -42,6 +42,7 @@ h1 {
 a {
   text-decoration: none;
   color: white;
+  text-align: left;
 }
 li:hover {
   background-color: #0056b3;
