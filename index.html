@@ -1,46 +1,345 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Logistics</title>
-  </head>
-  <body>
+    <title>Abdulaziz's Logistics Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.3;
+        }
+
+        #background-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .assignment-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .assignment-card:nth-child(1) { animation-delay: 0.1s; }
+        .assignment-card:nth-child(2) { animation-delay: 0.2s; }
+        .assignment-card:nth-child(3) { animation-delay: 0.3s; }
+        .assignment-card:nth-child(4) { animation-delay: 0.4s; }
+        .assignment-card:nth-child(5) { animation-delay: 0.5s; }
+        .assignment-card:nth-child(6) { animation-delay: 0.6s; }
+        .assignment-card:nth-child(7) { animation-delay: 0.7s; }
+
+        .assignment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .assignment-card:hover::before {
+            left: 100%;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+
+        .assignment-card:hover .card-icon {
+            transform: rotate(360deg) scale(1.1);
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .assignment-card:hover .card-title {
+            color: #f0f8ff;
+        }
+
+        .card-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-link:hover {
+            background: white;
+            transform: translateX(5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-link::after {
+            content: '→';
+            margin-left: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .card-link:hover::after {
+            transform: translateX(5px);
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .assignments-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .assignment-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
     <div class="video-background">
-      <video autoplay muted loop id="background-video">
-       <source src="logisticsVideo.mp4" type="video/mp4">
-      
-      </video>
+        <video autoplay muted loop id="background-video">
+            <source src="logisticsVideo.mp4" type="video/mp4">
+        </video>
     </div>
+    <div class="overlay"></div>
+    
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
     <div class="container">
-      <h1>ABDULAZIZ'S LOGISTICS ASSIGMENT LIST</h1>
-      <ul class="assigments">
-        <li> <a href="https://abdulaziz-abdukhalimov.github.io/flowchart-/" target="_blank" >Flowchart</a> </li>
-        <li> <a href ="https://abdulaziz-abdukhalimov.github.io/abdulaziz-leadTime/" target="_blank">Lead Time Analysis</a> </li>
-        <li> <a href ="https://shavkatjony.github.io/tsp.11/" target="_blank">TSP Game</a> </li>
-        <li> <a href ="https://abdulaziz-abdukhalimov.github.io/designThinking/" target="_blank">Design Thinking</a> </li>
-        <li> <a href ="https://docs.google.com/spreadsheets/d/173qX5OhX4kX2GZmHQiFAQlKsCDS4ZJIP/edit?usp=drive_link&ouid=103361880421656006871&rtpof=true&sd=true" target="_blank">ABC - Classification</a> </li>
-        <li> <a href ="https://docs.google.com/document/d/1gqtGYgJrscKg6ZsCKxm0VxTEk288y7ycyHZcVXuRoVQ/edit?usp=sharing" target="_blank">Slotting Strategy</a> </li>
-        <li> <a href ="https://docs.google.com/document/d/1TE919IEcwGS_mQHoa43oX4KmPOUbO2k_vUcpFlzio5s/edit?usp=sharing" target="_blank">Counterfit Arguments</a> </li>
-      </ul>
+        <div class="header">
+            <h1 class="main-title">ABDULAZIZ'S LOGISTICS</h1>
+            <p class="subtitle">Assignment Portfolio</p>
+        </div>
 
+        <div class="assignments-grid">
+            <div class="assignment-card">
+                <div class="card-icon">📊</div>
+                <h3 class="card-title">Flowchart</h3>
+                <p class="card-description">Interactive process flow visualization demonstrating logistics operations and decision-making pathways.</p>
+                <a href="https://abdulaziz-abdukhalimov.github.io/flowchart-/" target="_blank" class="card-link">View Project</a>
+            </div>
 
-      
-<!--       <div class="file-choose">
-        <form id="submit-form" method="post" action="/posted">
-          <label for="file-input"></label>
-          <input
-            type="text"
-            id="file-input"
-            class="file-input"
-            name="userInput"
-            required
-          />
-          <button type="submit" class="submit-btn">Submit</button>
-        </form>
-      </div> -->
+            <div class="assignment-card">
+                <div class="card-icon">⏱️</div>
+                <h3 class="card-title">Lead Time Analysis</h3>
+                <p class="card-description">Comprehensive analysis of supply chain timing and optimization strategies for efficient delivery.</p>
+                <a href="https://abdulaziz-abdukhalimov.github.io/abdulaziz-leadTime/" target="_blank" class="card-link">View Project</a>
+            </div>
+
+            <div class="assignment-card">
+                <div class="card-icon">🎮</div>
+                <h3 class="card-title">TSP Game</h3>
+                <p class="card-description">Interactive Traveling Salesman Problem game showcasing route optimization algorithms.</p>
+                <a href="https://shavkatjony.github.io/tsp.11/" target="_blank" class="card-link">Play Game</a>
+            </div>
+
+            <div class="assignment-card">
+                <div class="card-icon">💡</div>
+                <h3 class="card-title">Design Thinking</h3>
+                <p class="card-description">Human-centered design approach to solving complex logistics challenges through empathy and innovation.</p>
+                <a href="https://abdulaziz-abdukhalimov.github.io/designThinking/" target="_blank" class="card-link">View Project</a>
+            </div>
+
+            <div class="assignment-card">
+                <div class="card-icon">🔤</div>
+                <h3 class="card-title">ABC Classification</h3>
+                <p class="card-description">Inventory management system categorizing items by importance and value for optimal resource allocation.</p>
+                <a href="https://docs.google.com/spreadsheets/d/173qX5OhX4kX2GZmHQiFAQlKsCDS4ZJIP/edit?usp=drive_link&ouid=103361880421656006871&rtpof=true&sd=true" target="_blank" class="card-link">View Analysis</a>
+            </div>
+
+            <div class="assignment-card">
+                <div class="card-icon">📦</div>
+                <h3 class="card-title">Slotting Strategy</h3>
+                <p class="card-description">Warehouse optimization techniques for efficient product placement and inventory management.</p>
+                <a href="https://docs.google.com/document/d/1gqtGYgJrscKg6ZsCKxm0VxTEk288y7ycyHZcVXuRoVQ/edit?usp=sharing" target="_blank" class="card-link">View Document</a>
+            </div>
+
+            <div class="assignment-card">
+                <div class="card-icon">⚖️</div>
+                <h3 class="card-title">Counterfeit Arguments</h3>
+                <p class="card-description">Critical analysis of anti-counterfeiting strategies and their impact on supply chain integrity.</p>
+                <a href="https://docs.google.com/document/d/1TE919IEcwGS_mQHoa43oX4KmPOUbO2k_vUcpFlzio5s/edit?usp=sharing" target="_blank" class="card-link">View Document</a>
+            </div>
+        </div>
     </div>
-<!--     <script src="./index.js"></script> -->
-  </body>
+</body>
 </html>
