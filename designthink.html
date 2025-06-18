@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP Game: Design Thinking Process</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent-blue: #38bdf8;
+            --accent-purple: #818cf8;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --transition-speed: 0.4s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .design-phase {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            transition: all var(--transition-speed) ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .design-phase:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-blue);
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .phase-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+            color: white;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .phase-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .phase-content {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .phase-content ul {
+            margin-top: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .phase-content li {
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .phase-content li::before {
+            content: "→";
+            color: var(--accent-purple);
+            position: absolute;
+            left: -1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .design-phase {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js" class="particles"></div>
+
+    <div class="container">
+        <header>
+            <h1>🌌 TSP Game: Design Thinking Process</h1>
+            <p class="subtitle">Applying User-Centered Design to the Traveling Salesperson Problem Game</p>
+        </header>
+
+        <section class="design-phase">
+            <div class="phase-header">
+                <div class="phase-number">1</div>
+                <h2 class="phase-title">EMPATHIZE</h2>
+            </div>
+            <div class="phase-content">
+                <p>To grasp what makes an educational game truly effective and fun, I observed popular puzzle and strategy games known for their clear objectives and satisfying progression (e.g., <em>Portal</em>, <em>Sudoku apps</em>). I specifically noted how immediate visual feedback and a sense of accomplishment motivated players. For the context of TSP, I identified that students often struggle with abstract algorithms without a tangible, interactive representation. This highlighted the need for a game that transforms a complex math problem into an accessible, engaging challenge.</p>
+            </div>
+        </section>
+
+        <section class="design-phase">
+            <div class="phase-header">
+                <div class="phase-number">2</div>
+                <h2 class="phase-title">DEFINE</h2>
+            </div>
+            <div class="phase-content">
+                <p>The core idea for this game is to gamify the Traveling Salesperson Problem, making it an interactive challenge where players optimize delivery routes. Our primary audience is computer science and logistics students who need a more intuitive and engaging way to understand optimization algorithms. The experience we aim to create is one of discovery and satisfaction, where players actively explore different paths, immediately see the impact of their choices on efficiency, and feel a sense of achievement when they find better solutions.</p>
+            </div>
+        </section>
+
+        <section class="design-phase">
+            <div class="phase-header">
+                <div class="phase-number">3</div>
+                <h2 class="phase-title">IDEATE</h2>
+            </div>
+            <div class="phase-content">
+                <p>During ideation, we explored several concepts. For the theme, a 'space delivery' or 'interstellar cargo' scenario immediately stood out for its visual appeal and natural fit with 'traveling between points.' Mechanics considered included:</p>
+                <ul>
+                    <li>Point-and-click node selection for path creation</li>
+                    <li>Drag-and-drop to reorder stops</li>
+                    <li>Real-time distance calculation and visual feedback for the current route</li>
+                </ul>
+                <p>Layouts revolved around a central 'galaxy map' with distinct 'planets' (nodes) and glowing lines representing routes. Interactions focused on intuitive user input for path drawing and clear displays of optimization metrics.</p>
+            </div>
+        </section>
+
+        <section class="design-phase">
+            <div class="phase-header">
+                <div class="phase-number">4</div>
+                <h2 class="phase-title">PROTOTYPE</h2>
+            </div>
+            <div class="phase-content">
+                <p>The initial prototype was built using a simple HTML5 Canvas and JavaScript. It featured a static background with randomly placed 'planets' (circles). The core functionality allowed users to click on these circles to draw a path, and the total distance of the drawn path was calculated and displayed. This 'rough version' focused purely on testing the fundamental interaction of path creation and immediate quantitative feedback, without elaborate graphics or complex scoring systems.</p>
+            </div>
+        </section>
+
+        <section class="design-phase">
+            <div class="phase-header">
+                <div class="phase-number">5</div>
+                <h2 class="phase-title">TEST</h2>
+            </div>
+            <div class="phase-content">
+                <p>We conducted informal playtesting with a few peers who were familiar with algorithmic concepts. Key feedback focused on:</p>
+                <ul>
+                    <li>Clarity of instructions: Ensuring players immediately understood the objective</li>
+                    <li>Responsiveness of path drawing: Making sure the lines connected smoothly</li>
+                    <li>Impact of visual feedback: Confirming that seeing the distance change helped comprehension</li>
+                </ul>
+                <p>Suggestions included adding a 'best route' comparison for direct learning and varying the number of planets for different difficulty levels. This feedback directly informed iterative improvements to the user interface and the core gameplay loop.</p>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        &copy; <span id="current-year"></span> Design Thinking Process for TSP Game. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Set current year
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Initialize particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#38bdf8" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#38bdf8", opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 2, direction: "none", random: true, straight: false, out_mode: "out" }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" }
+                }
+            }
+        });
+
+        // Animate phases on scroll
+        const phases = document.querySelectorAll('.design-phase');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    
+                    // Add pulse animation to number
+                    const number = entry.target.querySelector('.phase-number');
+                    number.style.animation = 'pulse 0.5s ease-out';
+                    
+                    setTimeout(() => {
+                        number.style.animation = '';
+                    }, 500);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        phases.forEach(phase => {
+            observer.observe(phase);
+        });
+
+        // Add hover effect to phases
+        phases.forEach(phase => {
+            phase.addEventListener('mouseenter', () => {
+                const number = phase.querySelector('.phase-number');
+                number.style.transform = 'scale(1.1) rotate(10deg)';
+                const title = phase.querySelector('.phase-title');
+                title.style.textShadow = '0 0 10px rgba(56, 189, 248, 0.5)';
+            });
+            
+            phase.addEventListener('mouseleave', () => {
+                const number = phase.querySelector('.phase-number');
+                number.style.transform = 'scale(1) rotate(0)';
+                const title = phase.querySelector('.phase-title');
+                title.style.textShadow = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
