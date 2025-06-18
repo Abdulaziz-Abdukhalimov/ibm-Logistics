@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Slotting Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300,400,500,700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); /* Lighter, cooler gradient */
+            min-height: 100vh;
+            padding: 30px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98); /* Slightly less transparent */
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease-out; /* Main container fade-in */
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-bottom: 12px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe); /* New vibrant gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        /* Controls Section */
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .control-group {
+            background: #f0f8ff; /* Lighter background */
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #4facfe; /* Accent color border */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hover effect */
+        }
+
+        .control-group:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+        }
+
+        .control-group h3 {
+            color: #2c3e50;
+            margin-bottom: 18px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #444;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cceeff; /* Lighter border */
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.2);
+            outline: none;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #4facfe; /* Dashed border for file input */
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input:hover {
+            border-color: #00f2fe;
+            background: #e6f7ff;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(45deg, #4facfe, #00f2fe); /* New button gradient */
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, #00f2fe, #4facfe); /* Invert gradient on hover */
+        }
+
+        /* Results & Analysis Sections */
+        .results, .analysis-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 35px;
+            animation: fadeIn 0.8s ease-out; /* Fade-in for sections */
+        }
+
+        .result-section {
+            background: #f0f8ff;
+            padding: 30px;
+            border-radius: 16px;
+            border-top: 5px solid #4facfe;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .result-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .result-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+
+        /* Warehouse Grid Display */
+        .grid-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .warehouse-grid {
+            border-collapse: collapse;
+            margin: 0 auto;
+            min-width: 100%; /* Ensure table takes full width of container */
+        }
+
+        .warehouse-grid td {
+            width: 70px; /* Slightly larger cells */
+            height: 70px;
+            border: 1px solid #eee;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 12px;
+            font-weight: 500;
+            position: relative;
+            transition: background-color 0.3s ease; /* Smooth color change */
+        }
+
+        .warehouse-grid .header-cell {
+            background: #2c3e50;
+            color: white;
+            font-weight: 700;
+        }
+
+        /* Cell Colors */
+        .dock {
+            background: #e74c3c !important; /* Red */
+            color: white;
+            font-weight: bold;
+            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5); /* Inner white border */
+        }
+
+        .obstacle {
+            background: #7f8c8d !important; /* Darker grey */
+            color: white;
+            font-weight: bold;
+            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.3);
+        }
+
+        .class-a {
+            background: #2ecc71; /* Green */
+            color: white;
+        }
+
+        .class-b {
+            background: #f1c40f; /* Yellow */
+            color: white;
+        }
+
+        .class-c {
+            background: #3498db; /* Blue */
+            color: white;
+        }
+
+        .frequency-high {
+            background: linear-gradient(45deg, #e74c3c, #c0392b); /* Reddish high freq */
+            color: white;
+        }
+
+        .frequency-medium {
+            background: linear-gradient(45deg, #f39c12, #e67e22); /* Orangish medium freq */
+            color: white;
+        }
+
+        .frequency-low {
+            background: linear-gradient(45deg, #3498db, #2980b9); /* Bluish low freq */
+            color: white;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed #cceeff;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #eee; /* Light border for contrast */
+        }
+
+        /* Analysis Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .analysis-table th, .analysis-table td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0; /* Lighter border */
+        }
+
+        .analysis-table th {
+            background: #2c3e50;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        .analysis-table tbody tr:hover {
+            background: #f8faff; /* Lighter hover */
+        }
+
+        /* Stats Cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+        }
+
+        .stat-number {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #4facfe; /* Accent color */
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #555;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #4facfe;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .container {
+                padding: 25px;
+            }
+            .header h1 {
+                font-size: 2.2em;
+            }
+            .results, .analysis-section {
+                grid-template-columns: 1fr;
+            }
+            .warehouse-grid td {
+                width: 50px;
+                height: 50px;
+                font-size: 10px;
+            }
+            .stat-card {
+                padding: 20px;
+            }
+            .stat-number {
+                font-size: 1.8em;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 15px;
+            }
+            .container {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            .control-group {
+                padding: 20px;
+            }
+            .result-section {
+                padding: 20px;
+            }
+            .warehouse-grid td {
+                width: 40px;
+                height: 40px;
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Smart Warehouse Slotting Dashboard</h1>
+            <p>Optimize SKU placement for maximum efficiency based on pick frequency data.</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <h3>📁 Load Frequency Data</h3>
+                <div class="input-group">
+                    <label for="csvFile">Upload CSV File (Frequency Grid):</label>
+                    <input type="file" id="csvFile" accept=".csv" class="file-input">
+                </div>
+                <div class="input-group">
+                    <label for="dockRow">Dock Position - Row:</label>
+                    <input type="number" id="dockRow" value="3" min="0">
+                </div>
+                <div class="input-group">
+                    <label for="dockCol">Dock Position - Column:</label>
+                    <input type="number" id="dockCol" value="3" min="0">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>🎯 ABC Classification Settings</h3>
+                <div class="input-group">
+                    <label for="classA">Class A Percentage (%):</label>
+                    <input type="number" id="classA" value="20" min="1" max="100">
+                </div>
+                <div class="input-group">
+                    <label for="classB">Class B Percentage (%):</label>
+                    <input type="number" id="classB" value="30" min="1" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Class C: <span id="classCDisplay">50%</span></label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>🚧 Obstacles (Optional)</h3>
+                <div class="input-group">
+                    <label for="obstacles">Obstacle Positions (row,col format):</label>
+                    <input type="text" id="obstacles" placeholder="e.g., 1,0;2,4;3,1" value="2,0">
+                </div>
+                <button class="btn" onclick="processWarehouse()">✨ Generate Optimized Layout</button>
+            </div>
+        </div>
+
+        <div id="results" class="results" style="display: none;">
+            <div class="result-section">
+                <h3>📊 Original Frequency Layout</h3>
+                <div id="originalGrid" class="grid-container"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color frequency-high"></div>
+                        <span>High Frequency</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color frequency-medium"></div>
+                        <span>Medium Frequency</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color frequency-low"></div>
+                        <span>Low Frequency</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h3>🎯 Optimized SKU Layout</h3>
+                <div id="optimizedGrid" class="grid-container"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color class-a"></div>
+                        <span>Class A</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color class-b"></div>
+                        <span>Class B</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color class-c"></div>
+                        <span>Class C</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color dock"></div>
+                        <span>Dock</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color obstacle"></div>
+                        <span>Obstacle</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="analysis" class="analysis-section" style="display: none;">
+            <div class="result-section">
+                <h3>📈 Performance Analysis</h3>
+                <div class="stats" id="performanceStats"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>📋 SKU Classification Table</h3>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="analysis-table" id="skuTable">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Frequency</th>
+                                <th>Percentage</th>
+                                <th>Cumulative %</th>
+                                <th>Class</th>
+                                <th>Distance to Dock</th>
+                                <th>Original Pos</th>
+                                <th>New Pos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="skuTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let warehouseData = {
+        grid: [],
+        skus: [],
+        dockPos: {row: 3, col: 3},
+        obstacles: [],
+        abcPercentages: {A: 20, B: 30, C: 50}
+    };
+
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // Update Class C display when A or B changes
+    document.getElementById('classA').addEventListener('input', updateClassC);
+    document.getElementById('classB').addEventListener('input', updateClassC);
+
+    function updateClassC() {
+        const classA = parseInt(document.getElementById('classA').value) || 0;
+        const classB = parseInt(document.getElementById('classB').value) || 0;
+        const classC = Math.max(0, 100 - classA - classB);
+        document.getElementById('classCDisplay').textContent = classC + '%';
+    }
+
+    // CSV File handling
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            loadingOverlay.classList.add('show');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                parseCSV(csv);
+                loadingOverlay.classList.remove('show');
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    function parseCSV(csv) {
+        const lines = csv.trim().split('\n');
+        const grid = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+            // Trim and filter out empty strings before parsing to int
+            const row = lines[i].split(',').map(cell => parseInt(cell.trim())).filter(val => !isNaN(val));
+            if (row.length > 0) { // Only add non-empty rows
+                grid.push(row);
+            }
+        }
+        
+        if (grid.length > 0 && grid[0].length > 0) {
+            warehouseData.grid = grid;
+            console.log('Grid loaded:', grid);
+        } else {
+            alert('CSV file is empty or malformed. Please check the content.');
+            warehouseData.grid = []; // Clear grid if malformed
+        }
+    }
+
+    function processWarehouse() {
+        loadingOverlay.classList.add('show');
+
+        // Allow a small delay for the spinner to show before processing
+        setTimeout(() => {
+            if (warehouseData.grid.length === 0 || warehouseData.grid[0].length === 0) {
+                alert("No CSV data loaded or data is invalid. Using sample data.");
+                createSampleData();
+            }
+
+            // Update settings
+            warehouseData.dockPos = {
+                row: parseInt(document.getElementById('dockRow').value) || 0,
+                col: parseInt(document.getElementById('dockCol').value) || 0
+            };
+
+            warehouseData.abcPercentages = {
+                A: parseInt(document.getElementById('classA').value) || 20,
+                B: parseInt(document.getElementById('classB').value) || 30,
+                C: parseInt(document.getElementById('classCDisplay').textContent.replace('%', '')) || 50
+            };
+
+            // Parse obstacles
+            const obstacleText = document.getElementById('obstacles').value;
+            warehouseData.obstacles = parseObstacles(obstacleText);
+
+            // Ensure dock and obstacles are within grid bounds
+            const maxRow = warehouseData.grid.length - 1;
+            const maxCol = warehouseData.grid[0].length - 1;
+            
+            if (warehouseData.dockPos.row > maxRow || warehouseData.dockPos.col > maxCol ||
+                warehouseData.dockPos.row < 0 || warehouseData.dockPos.col < 0) {
+                alert(`Dock position (${warehouseData.dockPos.row},${warehouseData.dockPos.col}) is outside the grid bounds (max: ${maxRow},${maxCol}). Adjusting to a default if possible.`);
+                // Attempt to set a reasonable default if out of bounds
+                warehouseData.dockPos = {
+                    row: Math.min(Math.max(0, warehouseData.dockPos.row), maxRow),
+                    col: Math.min(Math.max(0, warehouseData.dockPos.col), maxCol)
+                };
+                 document.getElementById('dockRow').value = warehouseData.dockPos.row;
+                 document.getElementById('dockCol').value = warehouseData.dockPos.col;
+            }
+
+            warehouseData.obstacles = warehouseData.obstacles.filter(obs => {
+                const isValid = obs.row >= 0 && obs.row <= maxRow && obs.col >= 0 && obs.col <= maxCol;
+                if (!isValid) {
+                    console.warn(`Obstacle position (${obs.row},${obs.col}) is out of bounds and will be ignored.`);
+                }
+                return isValid;
+            });
+
+
+            // Process the warehouse
+            flattenGridToSKUs();
+            conductPareto();
+            calculateABCClasses();
+            optimizeSlotting();
+            displayResults();
+            loadingOverlay.classList.remove('show');
+        }, 100); // Small delay
+    }
+
+    function createSampleData() {
+        // Create a 5x6 sample grid with random frequencies if no CSV is uploaded
+        warehouseData.grid = [
+            [39, 29, 15, 43, 8, 21],
+            [39, 19, 23, 11, 11, 24],
+            [36, 40, 24, 3, 22, 2],
+            [24, 44, 30, 38, 2, 21],
+            [33, 12, 22, 44, 25, 49]
+        ];
+        console.log('Using sample data:', warehouseData.grid);
+    }
+
+    function parseObstacles(obstacleText) {
+        if (!obstacleText.trim()) return [];
+        
+        return obstacleText.split(';').map(pos => {
+            const [row, col] = pos.split(',').map(n => parseInt(n.trim()));
+            return { row, col };
+        }).filter(pos => !isNaN(pos.row) && !isNaN(pos.col));
+    }
+
+    function flattenGridToSKUs() {
+        const skus = [];
+        let skuIndex = 0;
+
+        for (let row = 0; row < warehouseData.grid.length; row++) {
+            for (let col = 0; col < warehouseData.grid[row].length; col++) {
+                // Ensure we only add valid cells, excluding dock/obstacles initially for original layout
+                const isDock = row === warehouseData.dockPos.row && col === warehouseData.dockPos.col;
+                const isObstacle = warehouseData.obstacles.some(obs => obs.row === row && obs.col === col);
+                
+                if (!isDock && !isObstacle) { // Only process actual SKUs for classification
+                    skus.push({
+                        id: `SKU${skuIndex + 1}`, // Start SKU ID from 1
+                        frequency: warehouseData.grid[row][col],
+                        originalRow: row,
+                        originalCol: col,
+                        newRow: row, // Temporarily set to original
+                        newCol: col // Temporarily set to original
+                    });
+                    skuIndex++;
+                }
+            }
+        }
+        warehouseData.skus = skus;
+    }
+
+    function conductPareto() {
+        // Sort SKUs by frequency (descending)
+        warehouseData.skus.sort((a, b) => b.frequency - a.frequency);
+        
+        // Calculate total frequency
+        const totalFrequency = warehouseData.skus.reduce((sum, sku) => sum + sku.frequency, 0);
+        
+        // Calculate percentages and cumulative percentages
+        let cumulativeFreq = 0;
+        warehouseData.skus.forEach(sku => {
+            sku.percentage = (sku.frequency / totalFrequency) * 100;
+            cumulativeFreq += sku.frequency;
+            sku.cumulativePercentage = (cumulativeFreq / totalFrequency) * 100;
+        });
+    }
+
+    function calculateABCClasses() {
+        const { A, B } = warehouseData.abcPercentages;
+        
+        warehouseData.skus.forEach(sku => {
+            if (sku.cumulativePercentage <= A) {
+                sku.class = 'A';
+            } else if (sku.cumulativePercentage <= A + B) {
+                sku.class = 'B';
+            } else {
+                sku.class = 'C';
+            }
+        });
+    }
+
+    function calculateDistance(pos1, pos2) {
+        return Math.abs(pos1.row - pos2.row) + Math.abs(pos1.col - pos2.col);
+    }
+
+    function optimizeSlotting() {
+        const rows = warehouseData.grid.length;
+        const cols = warehouseData.grid[0].length;
+        
+        // Create list of available positions (excluding dock and obstacles)
+        const availablePositions = [];
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const isDock = row === warehouseData.dockPos.row && col === warehouseData.dockPos.col;
+                const isObstacle = warehouseData.obstacles.some(obs => obs.row === row && obs.col === col);
+                
+                if (!isDock && !isObstacle) {
+                    availablePositions.push({
+                        row, col,
+                        distanceToDock: calculateDistance({row, col}, warehouseData.dockPos)
+                    });
+                }
+            }
+        }
+
+        // Sort positions by distance from dock (closest first)
+        availablePositions.sort((a, b) => a.distanceToDock - b.distanceToDock);
+
+        // Sort SKUs by class (A then B then C), then by frequency (descending) within class
+        warehouseData.skus.sort((a, b) => {
+            if (a.class === 'A' && b.class !== 'A') return -1;
+            if (a.class !== 'A' && b.class === 'A') return 1;
+            if (a.class === 'B' && b.class === 'C') return -1;
+            if (a.class === 'C' && b.class === 'B') return 1;
+            return b.frequency - a.frequency; // Secondary sort by frequency
+        });
+
+        // Assign positions to SKUs
+        let posIndex = 0;
+        warehouseData.skus.forEach(sku => {
+            if (posIndex < availablePositions.length) {
+                const pos = availablePositions[posIndex++];
+                sku.newRow = pos.row;
+                sku.newCol = pos.col;
+                sku.distanceToDock = pos.distanceToDock;
+            } else {
+                // Handle case where there are more SKUs than available slots
+                console.warn(`Not enough available slots for SKU ${sku.id}. It will not be placed.`);
+                sku.newRow = -1; // Indicate unplaced
+                sku.newCol = -1;
+                sku.distanceToDock = Infinity;
+            }
+        });
+
+        // Sort SKUs back to original order for consistent table display, if needed,
+        // or keep sorted by class/frequency for analysis table.
+        // For this dashboard, keeping them sorted by classification for the table is useful.
+    }
+
+    function displayResults() {
+        displayOriginalGrid();
+        displayOptimizedGrid();
+        displaySKUTable();
+        displayPerformanceStats();
+        
+        document.getElementById('results').style.display = 'grid';
+        document.getElementById('analysis').style.display = 'grid'; // Changed to grid for consistency
+    }
+
+    function displayOriginalGrid() {
+        const container = document.getElementById('originalGrid');
+        const table = createGridTable(warehouseData.grid, 'frequency');
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+
+    function displayOptimizedGrid() {
+        const container = document.getElementById('optimizedGrid');
+        const rows = warehouseData.grid.length;
+        const cols = warehouseData.grid[0].length;
+        
+        // Create optimized grid representation
+        const optimizedGridContent = Array(rows).fill().map(() => Array(cols).fill(null));
+        
+        // Place SKUs in their new positions
+        warehouseData.skus.forEach(sku => {
+            if (sku.newRow !== -1 && sku.newCol !== -1) { // Only place if it has a valid new position
+                optimizedGridContent[sku.newRow][sku.newCol] = sku;
+            }
+        });
+        
+        const table = createGridTable(optimizedGridContent, 'optimized');
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+
+    function createGridTable(grid, type) {
+        const table = document.createElement('table');
+        table.className = 'warehouse-grid';
+        
+        // Add header row for columns
+        const headerRow = table.insertRow();
+        headerRow.insertCell().textContent = ''; // Top-left empty cell
+        headerRow.cells[0].className = 'header-cell';
+        
+        for (let col = 0; col < grid[0].length; col++) {
+            const cell = headerRow.insertCell();
+            cell.textContent = col;
+            cell.className = 'header-cell';
+        }
+        
+        // Add data rows
+        for (let row = 0; row < grid.length; row++) {
+            const tr = table.insertRow();
+            const headerCell = tr.insertCell();
+            headerCell.textContent = row;
+            headerCell.className = 'header-cell';
+            
+            for (let col = 0; col < grid[row].length; col++) {
+                const cell = tr.insertCell();
+                
+                // Check for dock or obstacles first, as they override SKU placement
+                const isDock = row === warehouseData.dockPos.row && col === warehouseData.dockPos.col;
+                const isObstacle = warehouseData.obstacles.some(obs => obs.row === row && obs.col === col);
+
+                if (isDock) {
+                    cell.textContent = 'DOCK';
+                    cell.className = 'dock';
+                } else if (isObstacle) {
+                    cell.textContent = 'OBS';
+                    cell.className = 'obstacle';
+                }
+                // Display content based on type for actual SKU cells
+                else if (type === 'frequency') {
+                    const frequency = grid[row][col];
+                    cell.textContent = frequency;
+                    cell.className = getFrequencyClass(frequency);
+                }
+                else if (type === 'optimized') {
+                    const sku = grid[row][col]; // This will be null if no SKU assigned to this slot
+                    if (sku) {
+                        cell.textContent = sku.id;
+                        cell.className = `class-${sku.class.toLowerCase()}`;
+                    } else {
+                        cell.textContent = ''; // Empty slot
+                    }
+                }
+            }
+        }
+        
+        return table;
+    }
+
+    function getFrequencyClass(frequency) {
+        if (warehouseData.skus.length === 0) return ''; // Handle no data case
+
+        // Recalculate max/min frequencies from the original grid values
+        // This ensures the color mapping is consistent with the data loaded
+        const allFrequencies = warehouseData.grid.flat().filter(f => !isNaN(f));
+        const maxFreq = Math.max(...allFrequencies);
+        const minFreq = Math.min(...allFrequencies);
+        const range = maxFreq - minFreq;
+        
+        if (range === 0) { // All frequencies are the same
+             return 'frequency-medium';
+        } else if (frequency >= minFreq + (range * 0.67)) {
+            return 'frequency-high';
+        } else if (frequency >= minFreq + (range * 0.33)) {
+            return 'frequency-medium';
+        }
+        return 'frequency-low';
+    }
+
+    function displaySKUTable() {
+        const tbody = document.getElementById('skuTableBody');
+        tbody.innerHTML = '';
+        
+        // Sort SKUs for table display: Class A, then B, then C. Within each class, by frequency descending.
+        const sortedSkus = [...warehouseData.skus].sort((a, b) => {
+            const classOrder = { 'A': 1, 'B': 2, 'C': 3 };
+            if (classOrder[a.class] !== classOrder[b.class]) {
+                return classOrder[a.class] - classOrder[b.class];
+            }
+            return b.frequency - a.frequency; // Within class, sort by frequency
+        });
+
+
+        sortedSkus.forEach(sku => {
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${sku.id}</td>
+                <td>${sku.frequency}</td>
+                <td>${sku.percentage ? sku.percentage.toFixed(2) : 'N/A'}%</td>
+                <td>${sku.cumulativePercentage ? sku.cumulativePercentage.toFixed(2) : 'N/A'}%</td>
+                <td><span class="class-${sku.class ? sku.class.toLowerCase() : ''}" style="padding: 4px 8px; border-radius: 4px; color: white; display: inline-block;">${sku.class || 'N/A'}</span></td>
+                <td>${sku.distanceToDock !== Infinity ? sku.distanceToDock : 'Unplaced'}</td>
+                <td>(${sku.originalRow}, ${sku.originalCol})</td>
+                <td>${sku.newRow !== -1 ? `(${sku.newRow}, ${sku.newCol})` : 'Unplaced'}</td>
+            `;
+        });
+    }
+
+    function displayPerformanceStats() {
+        const container = document.getElementById('performanceStats');
+        
+        const classA = warehouseData.skus.filter(sku => sku.class === 'A' && sku.newRow !== -1);
+        const classB = warehouseData.skus.filter(sku => sku.class === 'B' && sku.newRow !== -1);
+        const classC = warehouseData.skus.filter(sku => sku.class === 'C' && sku.newRow !== -1);
+        
+        const avgDistanceA = classA.length > 0 ? (classA.reduce((sum, sku) => sum + sku.distanceToDock, 0) / classA.length).toFixed(1) : 'N/A';
+        const avgDistanceB = classB.length > 0 ? (classB.reduce((sum, sku) => sum + sku.distanceToDock, 0) / classB.length).toFixed(1) : 'N/A';
+        const avgDistanceC = classC.length > 0 ? (classC.reduce((sum, sku) => sum + sku.distanceToDock, 0) / classC.length).toFixed(1) : 'N/A';
+        
+        const totalPlacedSKUs = warehouseData.skus.filter(sku => sku.newRow !== -1).length;
+        const totalOriginalSKUs = warehouseData.skus.length;
+
+        // Calculate weighted average distance
+        let totalFrequencySum = 0;
+        let weightedDistanceSum = 0;
+
+        warehouseData.skus.forEach(sku => {
+            if (sku.newRow !== -1 && sku.distanceToDock !== undefined && !isNaN(sku.distanceToDock)) {
+                totalFrequencySum += sku.frequency;
+                weightedDistanceSum += sku.frequency * sku.distanceToDock;
+            }
+        });
+        const weightedAvgDistance = totalFrequencySum > 0 ? (weightedDistanceSum / totalFrequencySum).toFixed(1) : 'N/A';
+
+
+        container.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${classA.length}</div>
+                <div class="stat-label">Class A SKUs Placed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${classB.length}</div>
+                <div class="stat-label">Class B SKUs Placed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${classC.length}</div>
+                <div class="stat-label">Class C SKUs Placed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${avgDistanceA}</div>
+                <div class="stat-label">Avg Distance A</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${avgDistanceB}</div>
+                <div class="stat-label">Avg Distance B</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${avgDistanceC}</div>
+                <div class="stat-label">Avg Distance C</div>
+            </div>
+             <div class="stat-card">
+                <div class="stat-number">${weightedAvgDistance}</div>
+                <div class="stat-label">Weighted Avg Dist.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${totalPlacedSKUs} / ${totalOriginalSKUs}</div>
+                <div class="stat-label">SKUs Placed / Total</div>
+            </div>
+        `;
+    }
+
+    // Initialize with sample data on page load
+    window.onload = function() {
+        updateClassC();
+        // createSampleData(); // Optional: load sample data immediately on page load
+    };
+</script>
+</body>
+</html>
