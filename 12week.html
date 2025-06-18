@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC Classification & Slotting Strategy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: perspective(1000px) rotateX(0deg);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .header:hover {
+            transform: perspective(1000px) rotateX(5deg);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 15px rgba(0, 210, 255, 0.2);
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
+            to { text-shadow: 0 0 20px rgba(58, 123, 213, 0.6); }
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-delay: 0.2s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: #00d2ff;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border-radius: 50px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .file-input-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #3a7bd5, #00d2ff);
+            transition: all 0.4s ease;
+            z-index: -1;
+        }
+
+        .file-input-label:hover::before {
+            left: 0;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 210, 255, 0.4);
+        }
+
+        .file-input-label:active {
+            transform: translateY(1px);
+        }
+
+        .data-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .data-grid:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .data-grid th,
+        .data-grid td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .data-grid th {
+            background: linear-gradient(45deg, rgba(0, 210, 255, 0.3), rgba(58, 123, 213, 0.5));
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-grid tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .data-grid tbody tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .data-grid tbody tr:hover {
+            background-color: rgba(0, 210, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .heatmap-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s ease;
+        }
+
+        .heatmap-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .heatmap-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .heatmap-cell:hover::before {
+            opacity: 1;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.1) rotate(2deg);
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .class-a { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
+        .class-b { background: linear-gradient(45deg, #f9d423, #ff7e5f); }
+        .class-c { background: linear-gradient(45deg, #11998e, #38ef7d); }
+        .dock { background: linear-gradient(45deg, #4776E6, #8E54E9) !important; }
+        .obstacle { background: linear-gradient(45deg, #606c88, #3f4c6b) !important; }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f9d423, #ff7e5f);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .legend-item:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+            animation-delay: 0.6s !important;
+        }
+
+        .analysis-section {
+            margin-top: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+            animation-delay: 0.8s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 1s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 1.2s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 1.4s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #fff, #ddd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.5s ease;
+        }
+
+        .stat-card:hover .stat-number {
+            transform: scale(1.1);
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Floating animation for heatmap cells */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Pulse animation for buttons */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Add pulse animation to primary button */
+        .btn-primary {
+            animation: pulse 2s infinite;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #00d2ff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .heatmap-container {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 5px;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+
+        /* Confetti effect */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 9999;
+            animation: confettiFall 5s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ABC Classification & Slotting Strategy</h1>
+            <p>Optimize warehouse layout using Pareto analysis and ABC classification</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                    Data Input
+                </h2>
+                <div class="file-input-container">
+                    <input type="file" id="csvFile" class="file-input" accept=".csv" />
+                    <label for="csvFile" class="file-input-label">
+                        📁 Upload Initial Layout CSV
+                    </label>
+                </div>
+                <div id="fileInfo" style="margin-top: 10px; color: rgba(255, 255, 255, 0.8);"></div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="analyzeData()">📊 Analyze Data</button>
+                    <button class="btn btn-secondary" onclick="optimizeLayout()">🎯 Optimize Layout</button>
+                    <button class="btn btn-success" onclick="exportResults()">💾 Export Results</button>
+                </div>
+                <div id="spinner" class="spinner"></div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M3,3H21V5H3V7M3,11H21V13H3V11M3,15H21V17H3V15M3,19H21V21H3V19Z" />
+                    </svg>
+                    ABC Classification Results
+                </h2>
+                <div id="classificationResults">
+                    <p style="color: rgba(255, 255, 255, 0.7); text-align: center; padding: 20px;">
+                        Upload CSV file and click "Analyze Data" to see classification results
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M3,3V21H21V3H3M19,19H5V5H19V19Z" />
+                </svg>
+                Warehouse Layout Visualization
+            </h2>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color class-a"></div>
+                    <span>A Items (High Frequency)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color class-b"></div>
+                    <span>B Items (Medium Frequency)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color class-c"></div>
+                    <span>C Items (Low Frequency)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color dock"></div>
+                    <span>Dock (4,3)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color obstacle"></div>
+                    <span>Obstacle (2,4)</span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <h3 style="text-align: center; margin-bottom: 15px; color: #fff;">Original Layout</h3>
+                    <div id="originalHeatmap" class="heatmap-container"></div>
+                </div>
+                <div>
+                    <h3 style="text-align: center; margin-bottom: 15px; color: #fff;">Optimized Layout</h3>
+                    <div id="optimizedHeatmap" class="heatmap-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card full-width analysis-section">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z" />
+                </svg>
+                Performance Analysis
+            </h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-number" style="background: linear-gradient(45deg, #ff416c, #ff4b2b); -webkit-background-clip: text;">0</div>
+                    <div class="stat-label">A Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="background: linear-gradient(45deg, #f9d423, #ff7e5f); -webkit-background-clip: text;">0</div>
+                    <div class="stat-label">B Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="background: linear-gradient(45deg, #11998e, #38ef7d); -webkit-background-clip: text;">0</div>
+                    <div class="stat-label">C Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="background: linear-gradient(45deg, #4776E6, #8E54E9); -webkit-background-clip: text;">0%</div>
+                    <div class="stat-label">Efficiency Gain</div>
+                </div>
+            </div>
+            <div id="analysisTable"></div>
+        </div>
+    </div>
+
+    <script>
+        let warehouseData = [];
+        let skuAnalysis = [];
+        let optimizedLayout = [];
+
+        // Initialize with sample data
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create sample heatmap data
+            setTimeout(() => {
+                const actualData = [
+                    [39, 29, 15, 43, 8, 21],
+                    [39, 19, 23, 11, 11, 24],
+                    [36, 40, 24, 3, 22, 2],
+                    [24, 44, 30, 38, 2, 21],
+                    [33, 12, 22, 44, 25, 49]
+                ];
+                
+                warehouseData = actualData;
+                displayOriginalHeatmap();
+                
+                // Animate the header after load
+                document.querySelector('.header').style.transform = 'perspective(1000px) rotateX(0deg)';
+            }, 500);
+        });
+
+        document.getElementById('csvFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileInfo').innerHTML = `
+                    <strong>File loaded:</strong> ${file.name} (${(file.size / 1024).toFixed(2)} KB)
+                `;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    parseCSV(e.target.result);
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function parseCSV(csvText) {
+            showLoading();
+            setTimeout(() => {
+                const lines = csvText.trim().split('\n');
+                warehouseData = [];
+                
+                // Skip header row and parse data
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',');
+                    const rowData = values.slice(1).map(v => {
+                        const num = parseFloat(v.trim());
+                        return isNaN(num) ? 0 : num;
+                    });
+                    if (rowData.length > 0) {
+                        warehouseData.push(rowData);
+                    }
+                }
+                
+                // If no header detected, parse all rows as data
+                if (warehouseData.length === 0) {
+                    for (let i = 0; i < lines.length; i++) {
+                        const values = lines[i].split(',').map(v => {
+                            const num = parseFloat(v.trim());
+                            return isNaN(num) ? 0 : num;
+                        });
+                        warehouseData.push(values);
+                    }
+                }
+                
+                displayOriginalHeatmap();
+                hideLoading();
+                animateSuccess();
+            }, 1000);
+        }
+
+        function displayOriginalHeatmap() {
+            const container = document.getElementById('originalHeatmap');
+            container.innerHTML = '';
+            
+            // Use the actual data from your spreadsheet
+            const actualData = warehouseData.length > 0 ? warehouseData : [
+                [39, 29, 15, 43, 8, 21],
+                [39, 19, 23, 11, 11, 24],
+                [36, 40, 24, 3, 22, 2],
+                [24, 44, 30, 38, 2, 21],
+                [33, 12, 22, 44, 25, 49]
+            ];
+            
+            let skuIndex = 0;
+            const maxFreq = Math.max(...actualData.flat());
+            
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 6; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    
+                    if (row === 4 && col === 3) {
+                        cell.className += ' dock';
+                        cell.innerHTML = `<div>DOCK</div><div>44</div>`;
+                    } else if (row === 2 && col === 4) {
+                        cell.className += ' obstacle';
+                        cell.innerHTML = `<div>OBSTACLE</div><div>22</div>`;
+                    } else {
+                        const frequency = actualData[row][col];
+                        cell.innerHTML = `<div>SKU${skuIndex}</div><div>${frequency}</div>`;
+                        
+                        // Color based on frequency intensity
+                        const intensity = frequency / maxFreq;
+                        if (intensity > 0.7) {
+                            cell.className += ' class-a';
+                        } else if (intensity > 0.4) {
+                            cell.className += ' class-b';
+                        } else {
+                            cell.className += ' class-c';
+                        }
+                        
+                        // Add floating animation to cells with frequency > 0
+                        if (frequency > 0) {
+                            cell.style.animation = `float ${3 + Math.random() * 2}s ease-in-out infinite`;
+                            cell.style.animationDelay = `${Math.random() * 2}s`;
+                        }
+                    }
+                    
+                    skuIndex++;
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function analyzeData() {
+            if (warehouseData.length === 0) {
+                alert('Please upload a CSV file first!');
+                return;
+            }
+
+            showLoading();
+            setTimeout(() => {
+                // Create SKU analysis with correct data
+                const actualData = warehouseData.length > 0 ? warehouseData : [
+                    [39, 29, 15, 43, 8, 21],
+                    [39, 19, 23, 11, 11, 24],
+                    [36, 40, 24, 3, 22, 2],
+                    [24, 44, 30, 38, 2, 21],
+                    [33, 12, 22, 44, 25, 49]
+                ];
+
+                skuAnalysis = [];
+                let skuIndex = 0;
+                let totalPicks = 0;
+
+                for (let row = 0; row < 5; row++) {
+                    for (let col = 0; col < 6; col++) {
+                        if (!((row === 4 && col === 3) || (row === 2 && col === 4))) {
+                            const frequency = actualData[row][col];
+                            skuAnalysis.push({
+                                sku: `SKU${skuIndex}`,
+                                frequency: frequency,
+                                row: row,
+                                col: col,
+                                position: `(${row},${col})`
+                            });
+                            totalPicks += frequency;
+                        }
+                        skuIndex++;
+                    }
+                }
+
+                // Sort by frequency (descending)
+                skuAnalysis.sort((a, b) => b.frequency - a.frequency);
+
+                // Calculate cumulative percentages and assign ABC classes
+                let cumulativePicks = 0;
+                for (let i = 0; i < skuAnalysis.length; i++) {
+                    cumulativePicks += skuAnalysis[i].frequency;
+                    skuAnalysis[i].cumulativePercentage = (cumulativePicks / totalPicks) * 100;
+                    
+                    // ABC Classification based on cumulative percentage
+                    if (skuAnalysis[i].cumulativePercentage <= 20) {
+                        skuAnalysis[i].class = 'A';
+                    } else if (skuAnalysis[i].cumulativePercentage <= 50) {
+                        skuAnalysis[i].class = 'B';
+                    } else {
+                        skuAnalysis[i].class = 'C';
+                    }
+                }
+
+                displayAnalysisResults();
+                updateStats();
+                hideLoading();
+                animateSuccess();
+            }, 1500);
+        }
+
+        function displayAnalysisResults() {
+            const container = document.getElementById('classificationResults');
+            
+            let html = `
+                <table class="data-grid">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Frequency</th>
+                            <th>Cumulative %</th>
+                            <th>Class</th>
+                            <th>Current Position</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            skuAnalysis.slice(0, 15).forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.sku}</td>
+                        <td>${item.frequency}</td>
+                        <td>${item.cumulativePercentage.toFixed(2)}%</td>
+                        <td><span style="color: ${item.class === 'A' ? '#ff416c' : item.class === 'B' ? '#f9d423' : '#38ef7d'}; font-weight: bold;">${item.class}</span></td>
+                        <td>${item.position}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+
+            // Animate table rows
+            const rows = container.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                setTimeout(() => {
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-20px)';
+                    row.style.transition = 'all 0.5s ease-out';
+                    setTimeout(() => {
+                        row.style.opacity = '1';
+                        row.style.transform = 'translateX(0)';
+                    }, 50);
+                }, index * 100);
+            });
+
+            // Display full analysis table
+            displayFullAnalysisTable();
+        }
+
+        function displayFullAnalysisTable() {
+            const container = document.getElementById('analysisTable');
+            
+            let html = `
+                <h3 style="margin: 20px 0; color: #fff;">Complete SKU Analysis</h3>
+                <table class="data-grid">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>SKU</th>
+                            <th>Pick Frequency</th>
+                            <th>Cumulative %</th>
+                            <th>ABC Class</th>
+                            <th>Current Position</th>
+                            <th>Distance to Dock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            skuAnalysis.forEach((item, index) => {
+                const distanceToDock = Math.abs(item.row - 4) + Math.abs(item.col - 3);
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.sku}</td>
+                        <td>${item.frequency}</td>
+                        <td>${item.cumulativePercentage.toFixed(2)}%</td>
+                        <td><span style="color: ${item.class === 'A' ? '#ff416c' : item.class === 'B' ? '#f9d423' : '#38ef7d'}; font-weight: bold;">${item.class}</span></td>
+                        <td>${item.position}</td>
+                        <td>${distanceToDock}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function optimizeLayout() {
+            if (skuAnalysis.length === 0) {
+                alert('Please analyze data first!');
+                return;
+            }
+
+            showLoading();
+            setTimeout(() => {
+                // Create optimized layout
+                optimizedLayout = Array(5).fill(null).map(() => Array(6).fill(null));
+                
+                // Mark dock and obstacle
+                optimizedLayout[4][3] = 'DOCK';
+                optimizedLayout[2][4] = 'OBSTACLE';
+
+                // Calculate distances to dock for all positions
+                const positions = [];
+                for (let row = 0; row < 5; row++) {
+                    for (let col = 0; col < 6; col++) {
+                        if (!((row === 4 && col === 3) || (row === 2 && col === 4))) {
+                            const distance = Math.abs(row - 4) + Math.abs(col - 3);
+                            positions.push({ row, col, distance });
+                        }
+                    }
+                }
+
+                // Sort positions by distance to dock (ascending)
+                positions.sort((a, b) => a.distance - b.distance);
+
+                // Assign SKUs to positions based on class priority
+                const aItems = skuAnalysis.filter(item => item.class === 'A');
+                const bItems = skuAnalysis.filter(item => item.class === 'B');
+                const cItems = skuAnalysis.filter(item => item.class === 'C');
+
+                let positionIndex = 0;
+
+                // Place A items first (closest to dock)
+                aItems.forEach(item => {
+                    if (positionIndex < positions.length) {
+                        const pos = positions[positionIndex];
+                        optimizedLayout[pos.row][pos.col] = { ...item, newPosition: `(${pos.row},${pos.col})` };
+                        positionIndex++;
+                    }
+                });
+
+                // Place B items next
+                bItems.forEach(item => {
+                    if (positionIndex < positions.length) {
+                        const pos = positions[positionIndex];
+                        optimizedLayout[pos.row][pos.col] = { ...item, newPosition: `(${pos.row},${pos.col})` };
+                        positionIndex++;
+                    }
+                });
+
+                // Place C items last
+                cItems.forEach(item => {
+                    if (positionIndex < positions.length) {
+                        const pos = positions[positionIndex];
+                        optimizedLayout[pos.row][pos.col] = { ...item, newPosition: `(${pos.row},${pos.col})` };
+                        positionIndex++;
+                    }
+                });
+
+                displayOptimizedHeatmap();
+                calculateEfficiencyGain();
+                hideLoading();
+                animateSuccess();
+                createConfetti();
+            }, 2000);
+        }
+
+        function displayOptimizedHeatmap() {
+            const container = document.getElementById('optimizedHeatmap');
+            container.innerHTML = '';
+            
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 6; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    
+                    const item = optimizedLayout[row][col];
+                    
+                    if (item === 'DOCK') {
+                        cell.className += ' dock';
+                        cell.innerHTML = `<div>DOCK</div>`;
+                    } else if (item === 'OBSTACLE') {
+                        cell.className += ' obstacle';
+                        cell.innerHTML = `<div>OBSTACLE</div>`;
+                    } else if (item) {
+                        cell.className += ` class-${item.class.toLowerCase()}`;
+                        cell.innerHTML = `<div>${item.sku}</div><div>${item.frequency}</div>`;
+                        cell.title = `${item.sku} - Class ${item.class} - Frequency: ${item.frequency}`;
+                        
+                        // Add floating animation to all cells
+                        cell.style.animation = `float ${3 + Math.random() * 2}s ease-in-out infinite`;
+                        cell.style.animationDelay = `${Math.random() * 2}s`;
+                    }
+                    
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function calculateEfficiencyGain() {
+            // Calculate weighted distance for original layout
+            let originalWeightedDistance = 0;
+            let optimizedWeightedDistance = 0;
+
+            skuAnalysis.forEach(item => {
+                const originalDistance = Math.abs(item.row - 4) + Math.abs(item.col - 3);
+                originalWeightedDistance += item.frequency * originalDistance;
+            });
+
+            // Calculate weighted distance for optimized layout
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 6; col++) {
+                    const item = optimizedLayout[row][col];
+                    if (item && typeof item === 'object') {
+                        const distance = Math.abs(row - 4) + Math.abs(col - 3);
+                        optimizedWeightedDistance += item.frequency * distance;
+                    }
+                }
+            }
+
+            const efficiencyGain = ((originalWeightedDistance - optimizedWeightedDistance) / originalWeightedDistance) * 100;
+            
+            // Update efficiency stat with animation
+            const efficiencyElement = document.querySelector('.stat-card:last-child .stat-number');
+            animateValue(efficiencyElement, 0, efficiencyGain, 1500);
+            
+            // Color based on gain
+            efficiencyElement.style.background = efficiencyGain > 0 ? 
+                'linear-gradient(45deg, #38ef7d, #11998e)' : 
+                'linear-gradient(45deg, #ff416c, #ff4b2b)';
+            efficiencyElement.style.webkitBackgroundClip = 'text';
+        }
+
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = progress * (end - start) + start;
+                element.textContent = `${value.toFixed(1)}%`;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function updateStats() {
+            const aCount = skuAnalysis.filter(item => item.class === 'A').length;
+            const bCount = skuAnalysis.filter(item => item.class === 'B').length;
+            const cCount = skuAnalysis.filter(item => item.class === 'C').length;
+
+            const statCards = document.querySelectorAll('.stat-card .stat-number');
+            animateValue(statCards[0], 0, aCount, 1000);
+            animateValue(statCards[1], 0, bCount, 1000);
+            animateValue(statCards[2], 0, cCount, 1000);
+        }
+
+        function exportResults() {
+            if (skuAnalysis.length === 0) {
+                alert('No data to export. Please analyze data first!');
+                return;
+            }
+
+            showLoading();
+            setTimeout(() => {
+                let csvContent = "SKU,Original_Row,Original_Col,Pick_Frequency,Cumulative_Percentage,ABC_Class,Optimized_Row,Optimized_Col,Distance_to_Dock_Original,Distance_to_Dock_Optimized\n";
+                
+                skuAnalysis.forEach(item => {
+                    // Find optimized position
+                    let optimizedRow = '', optimizedCol = '';
+                    for (let row = 0; row < 5; row++) {
+                        for (let col = 0; col < 6; col++) {
+                            const optimizedItem = optimizedLayout[row][col];
+                            if (optimizedItem && typeof optimizedItem === 'object' && optimizedItem.sku === item.sku) {
+                                optimizedRow = row;
+                                optimizedCol = col;
+                                break;
+                            }
+                        }
+                    }
+
+                    const originalDistance = Math.abs(item.row - 4) + Math.abs(item.col - 3);
+                    const optimizedDistance = optimizedRow !== '' ? Math.abs(optimizedRow - 4) + Math.abs(optimizedCol - 3) : '';
+
+                    csvContent += `${item.sku},${item.row},${item.col},${item.frequency},${item.cumulativePercentage.toFixed(2)},${item.class},${optimizedRow},${optimizedCol},${originalDistance},${optimizedDistance}\n`;
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('hidden', '');
+                a.setAttribute('href', url);
+                a.setAttribute('download', 'abc_classification_results.csv');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                hideLoading();
+                animateSuccess();
+            }, 1000);
+        }
+
+        function showLoading() {
+            document.getElementById('spinner').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('spinner').style.display = 'none';
+        }
+
+        function animateSuccess() {
+            const btn = document.querySelector('.btn-success');
+            btn.classList.add('pulse');
+            setTimeout(() => {
+                btn.classList.remove('pulse');
+            }, 1000);
+        }
+
+        function createConfetti() {
+            const colors = ['#ff416c', '#ff4b2b', '#f9d423', '#ff7e5f', '#11998e', '#38ef7d', '#4776E6', '#8E54E9'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.width = `${5 + Math.random() * 5}px`;
+                confetti.style.height = `${5 + Math.random() * 5}px`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = `${3 + Math.random() * 4}s`;
+                document.body.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
